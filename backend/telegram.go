@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	Debug           = false
-	bot             *tgbotapi.BotAPI
-	codes           = make(map[int]int64)
-	answerdMessages = make(map[int64]bool)
+	Debug            = false
+	bot              *tgbotapi.BotAPI
+	codes            = make(map[int]int64)
+	answeredMessages = make(map[int64]bool)
 )
 
 func InitTelegram() {
@@ -63,7 +63,7 @@ func InitTelegram() {
 
 		} else if update.CallbackQuery != nil {
 			// Skip already processed messages
-			if answerdMessages[int64(update.CallbackQuery.Message.MessageID)] {
+			if answeredMessages[int64(update.CallbackQuery.Message.MessageID)] {
 				continue
 			}
 
@@ -78,11 +78,11 @@ func InitTelegram() {
 				acceptInvite(update.CallbackQuery.Message.Chat.ID)
 				deleteMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID)
 
-				answerdMessages[int64(update.CallbackQuery.Message.MessageID)] = true
+				answeredMessages[int64(update.CallbackQuery.Message.MessageID)] = true
 				msg = tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "You are in!")
 				var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 					tgbotapi.NewInlineKeyboardRow(
-						tgbotapi.NewInlineKeyboardButtonData("Cancle", "cancle"),
+						tgbotapi.NewInlineKeyboardButtonData("Cancel", "cancel"),
 					))
 				msg.ReplyMarkup = keyboard
 
@@ -93,14 +93,14 @@ func InitTelegram() {
 			case "no":
 				declineInvite(update.CallbackQuery.Message.Chat.ID)
 				deleteMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID)
-				answerdMessages[int64(update.CallbackQuery.Message.MessageID)] = true
+				answeredMessages[int64(update.CallbackQuery.Message.MessageID)] = true
 
 				msg = tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "You are out!\n Fuck you")
 				if _, err := bot.Send(msg); err != nil {
 					log.Panic(err)
 				}
 
-			case "cancle":
+			case "cancel":
 				deleteMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID)
 				msg = tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Nice gehöppert!")
 				if _, err := bot.Send(msg); err != nil {
