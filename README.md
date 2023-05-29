@@ -2,9 +2,9 @@
 
 A Discord and Telegram Bot that messages your friends for you!
 
-## Running the Programm
+## Running the Program
 
-### Localy
+### Locally
 
 Create an .env file or set the Envs according to the [.env.example](.env.example) and
 Create an sqlite Database
