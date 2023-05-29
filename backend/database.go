@@ -57,7 +57,9 @@ func RemoveFriend(userId string, friendId string) string {
 
 	for i, f := range user.Friends {
 		if f.DiscordId == friendId {
-			user.Friends = append(user.Friends[:i], user.Friends[i+1:]...)
+			user.Friends[i] = user.Friends[len(user.Friends)-1] // Copy last element to index i.
+			user.Friends[len(user.Friends)-1] = model.User{}    // Erase last element (write zero value).
+			user.Friends = user.Friends[:len(user.Friends)-1]   // Truncate slice.
 			db.Save(&user)
 			return "Removed " + f.Name + " as friend!"
 		}
@@ -75,7 +77,7 @@ func ListFriends(userId string) string {
 	return msg
 }
 
-func RegisterUser(user model.User, telegramCode int) error {
+func registerUser(user model.User, telegramCode int) error {
 	log.Println("Registered user " + user.Name + " with code " + fmt.Sprint(telegramCode))
 
 	chatId, ok := codes[telegramCode]
@@ -109,11 +111,32 @@ func RegisterUser(user model.User, telegramCode int) error {
 	return nil
 }
 
-func assemble(userId string) string {
+// Returns True if telegram is connected to discord
+func checkTelegramLink(userId int64) bool {
 	var user model.User
-	db.Preload("Friends").First(&user, "discord_id = ?", userId)
-	for _, f := range user.Friends {
-		sendMessage(*f.TelegramId, user.Name)
+	result := db.First(&user, "telegram_id = ?", userId)
+	return result.Error == nil
+}
+
+//Remove Telegram Link
+func removeTelegramLink(userId int64) bool {
+	var user model.User
+	result := db.First(&user, "telegram_id = ?", userId)
+
+	if result.Error != nil {
+		return false
 	}
-	return "You have no friends!"
+
+	user.TelegramId = nil
+	db.Save(&user)
+	return true
+}
+
+func removeAllUserData(discordID string) bool {
+	var user model.User
+	result := db.Unscoped().Where("discord_id = ?", discordID).Delete(&user)
+	if Debug {
+		log.Println(result)
+	}
+	return result.Error == nil && result.RowsAffected > 0
 }

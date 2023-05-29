@@ -41,6 +41,14 @@ var (
 			Description: "Assembles a group of people",
 		},
 		{
+			Name:        "data",
+			Description: "Shows what data Broemp Signal stores about you",
+		},
+		{
+			Name:        "unregister",
+			Description: "Unregister your account/Remove all your data",
+		},
+		{
 			Name:        "friends",
 			Description: "Manage your friends",
 			Options: []*discordgo.ApplicationCommandOption{
@@ -100,18 +108,44 @@ var (
 				},
 			})
 		},
-		"assemble": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			assemble(i.Member.User.ID)
+		"data": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Assembling...",
+					Content: "Broemp Signal stores the following data:\n\n" +
+						"Your Discord ID\n" +
+						"Your Discord Username\n" +
+						"The Telegram Chat ID with the Bot(Not your phone number!)\n" +
+						"Your Friends Discord ID\n\n" +
+						"Broemp Signal does not store any messages or any other data\n" +
+						"Broemp Signal does not share any data with any third party\n" +
+						"You can delete your data at any time with /unregister\n\n",
 				},
 			})
+		},
+		"unregister": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			if removeAllUserData(i.Member.User.ID) {
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "Removed all of your Data!\nIf you want to use Broemp Signal again, you have to register again!",
+					},
+				})
+			} else {
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "You are not registered!",
+					},
+				})
+			}
+		},
+		"assemble": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			msg := assemble(i.Member.User.ID, i.Interaction)
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Found 3 people!",
+					Content: msg,
 				},
 			})
 		},
@@ -120,8 +154,11 @@ var (
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
-						Content: "Please start a Conversation with the Telegram Bot @" + TelegramBotName +
-							" and send the code you get from it here\nYou can get the code by sending /start in the Telegram Bot\nAfter that you can register your account on Discord with /register <code>",
+						Content: "Please start a Conversation in the Telegram App with the Bot @" + TelegramBotName + "\n\n" +
+							"You can get a code by sending /start to the Telegram Bot\n" +
+							"Afterwards you can connect your account to Discord with /register <code>\n\n" +
+							"You can start the chat by clicking this link on your phone https://t.me/" + TelegramBotName +
+							"\n\n Or use Telegram Web at https://web.telegram.org/#/im?p=@" + TelegramBotName,
 					},
 				})
 			} else {
@@ -132,7 +169,7 @@ var (
 
 				code := int(math.Round(i.ApplicationCommandData().Options[0].Value.(float64)))
 
-				err := RegisterUser(user, code)
+				err := registerUser(user, code)
 
 				if err == nil {
 					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -206,4 +243,11 @@ func registerCommands(s *discordgo.Session) {
 func CloseDiscord() {
 	log.Println("Closing Discord")
 	s.Close()
+}
+
+// TODO make embed or retain old accepts
+func updateInteraction(interaction *discordgo.Interaction, msg string) {
+	s.InteractionResponseEdit(interaction, &discordgo.WebhookEdit{
+		Content: &msg,
+	})
 }
