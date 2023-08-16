@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  broempSignal:
+    image: broemp/broemp-signal:latest
+    container_name: broempSignal
+    restart: always
+    environment:
+      # Discord Bot Token https://discord.com/developers/applications
+      - DISCORD_API_KEY=<token>
+      # Telegram Bot Token https://telegram.me/BotFather
+      - TELEGRAM_API_KEY=<token>
+      #DB Settings
+      - DB_DRIVER=postgres
+      - DB_SOURCE=postgresql://{USER}:{PASSWORD}@{IP}:{PORT}/broempSignal?sslmode=disable
+      #Server Settings
+      - SERVER_ADDRESS=0.0.0.0:8080
+    # or use env_file
+    #env_file:
+    #  - ".env"
