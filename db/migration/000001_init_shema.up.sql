@@ -3,6 +3,7 @@ CREATE TABLE "user" (
   "username" varchar NOT NULL,
   "discordid" bigint NOT NULL,
   "telegramid" bigint,
+  "afk" int NOT NULL DEFAULT 0,
   "created_at" timestamp DEFAULT (now())
 );
 

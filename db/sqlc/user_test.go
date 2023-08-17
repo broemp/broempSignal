@@ -94,3 +94,18 @@ func TestUpdateTelegramId(t *testing.T) {
 	require.Equal(t, user1.Discordid, user2.Discordid)
 	require.WithinDuration(t, user1.CreatedAt.Time, user2.CreatedAt.Time, time.Second)
 }
+
+func TestIncrementAFKCount(t *testing.T) {
+	var num int32 = 0
+	user1 := createRandomUser(t)
+	afk, err := testQueries.GetAFKCount(context.Background(), user1.Discordid)
+	require.NoError(t, err)
+	require.Equal(t, num, afk)
+	num++
+	err = testQueries.IncrementAFKCount(context.Background(), user1.Discordid)
+	require.NoError(t, err)
+	afk2, err := testQueries.GetAFKCount(context.Background(), user1.Discordid)
+	require.NoError(t, err)
+
+	require.Equal(t, num, afk2)
+}

@@ -12,9 +12,12 @@ type Config struct {
 	// Server Settings
 	ServerAddress string `mapstructure:"SERVER_ADDRESS"`
 
-	// API Keys
-	DiscordToken  string `mapstructure:"DISCORD_TOKEN"`
+	// Telegram Settings
 	TelegramToken string `mapstructure:"TELEGRAM_TOKEN"`
+
+	// Discord Settings
+	DiscordToken   string `mapstructure:"DISCORD_TOKEN"`
+	DiscordGuildId string `mapstructure:"DISCORD_GUILD_ID"`
 }
 
 // LoadConfig reads configuration file/enviroment

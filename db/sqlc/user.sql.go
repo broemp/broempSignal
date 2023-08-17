@@ -15,7 +15,7 @@ INSERT INTO "user" (
     username, discordid, telegramid
 ) VALUES (
     $1, $2, $3
-) RETURNING userid, username, discordid, telegramid, created_at
+) RETURNING userid, username, discordid, telegramid, afk, created_at
 `
 
 type CreateUserParams struct {
@@ -32,6 +32,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Username,
 		&i.Discordid,
 		&i.Telegramid,
+		&i.Afk,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -47,8 +48,20 @@ func (q *Queries) DeleteUser(ctx context.Context, userid int64) error {
 	return err
 }
 
+const getAFKCount = `-- name: GetAFKCount :one
+SELECT afk from "user"
+WHERE discordid = $1
+`
+
+func (q *Queries) GetAFKCount(ctx context.Context, discordid int64) (int32, error) {
+	row := q.db.QueryRowContext(ctx, getAFKCount, discordid)
+	var afk int32
+	err := row.Scan(&afk)
+	return afk, err
+}
+
 const getUser = `-- name: GetUser :one
-SELECT userid, username, discordid, telegramid, created_at from "user"
+SELECT userid, username, discordid, telegramid, afk, created_at from "user"
 WHERE userid = $1
 `
 
@@ -60,13 +73,14 @@ func (q *Queries) GetUser(ctx context.Context, userid int64) (User, error) {
 		&i.Username,
 		&i.Discordid,
 		&i.Telegramid,
+		&i.Afk,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUserByDiscordId = `-- name: GetUserByDiscordId :one
-SELECT userid, username, discordid, telegramid, created_at FROM "user"
+SELECT userid, username, discordid, telegramid, afk, created_at FROM "user"
 WHERE discordid = $1
 `
 
@@ -78,13 +92,14 @@ func (q *Queries) GetUserByDiscordId(ctx context.Context, discordid int64) (User
 		&i.Username,
 		&i.Discordid,
 		&i.Telegramid,
+		&i.Afk,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUserByTelegramId = `-- name: GetUserByTelegramId :one
-SELECT userid, username, discordid, telegramid, created_at FROM "user"
+SELECT userid, username, discordid, telegramid, afk, created_at FROM "user"
 WHERE telegramid = $1
 `
 
@@ -96,13 +111,25 @@ func (q *Queries) GetUserByTelegramId(ctx context.Context, telegramid sql.NullIn
 		&i.Username,
 		&i.Discordid,
 		&i.Telegramid,
+		&i.Afk,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
+const incrementAFKCount = `-- name: IncrementAFKCount :exec
+UPDATE "user" SET afk = afk +1
+WHERE discordid = $1
+RETURNING afk
+`
+
+func (q *Queries) IncrementAFKCount(ctx context.Context, discordid int64) error {
+	_, err := q.db.ExecContext(ctx, incrementAFKCount, discordid)
+	return err
+}
+
 const listUsers = `-- name: ListUsers :many
-SELECT userid, username, discordid, telegramid, created_at from "user"
+SELECT userid, username, discordid, telegramid, afk, created_at from "user"
 ORDER BY userid
 LIMIT $1
 OFFSET $2
@@ -127,6 +154,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.Username,
 			&i.Discordid,
 			&i.Telegramid,
+			&i.Afk,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err

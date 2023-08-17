@@ -34,5 +34,6 @@ type User struct {
 	Username   string        `json:"username"`
 	Discordid  int64         `json:"discordid"`
 	Telegramid sql.NullInt64 `json:"telegramid"`
+	Afk        int32         `json:"afk"`
 	CreatedAt  sql.NullTime  `json:"created_at"`
 }

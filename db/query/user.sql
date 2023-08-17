@@ -30,3 +30,12 @@ SELECT * from "user"
 ORDER BY userid
 LIMIT $1
 OFFSET $2;
+
+-- name: GetAFKCount :one
+SELECT afk from "user"
+WHERE discordid = $1;
+
+-- name: IncrementAFKCount :exec
+UPDATE "user" SET afk = afk +1
+WHERE discordid = $1
+RETURNING afk;

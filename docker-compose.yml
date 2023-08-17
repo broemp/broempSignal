@@ -7,9 +7,9 @@ services:
     restart: always
     environment:
       # Discord Bot Token https://discord.com/developers/applications
-      - DISCORD_API_KEY=<token>
+      - DISCORD_TOKEN=<token>
       # Telegram Bot Token https://telegram.me/BotFather
-      - TELEGRAM_API_KEY=<token>
+      - TELEGRAM_TOKEN=<token>
       #DB Settings
       - DB_DRIVER=postgres
       - DB_SOURCE=postgresql://{USER}:{PASSWORD}@{IP}:{PORT}/broempSignal?sslmode=disable
