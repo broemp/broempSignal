@@ -1,15 +1,11 @@
 -- name: CreateUser :one
 INSERT INTO "user" (
-    username, discordid, telegramid
+    discordid, username, telegramid
 ) VALUES (
     $1, $2, $3
 ) RETURNING *;
 
 -- name: GetUser :one
-SELECT * from "user"
-WHERE userid = $1;
-
--- name: GetUserByDiscordId :one
 SELECT * FROM "user"
 WHERE discordid = $1;
 
@@ -19,14 +15,14 @@ WHERE telegramid = $1;
 
 -- name: DeleteUser :exec
 DELETE FROM "user"
-WHERE userid = $1;
+WHERE discordid = $1;
 
 -- name: UpdateTelegramId :exec
 UPDATE "user" SET telegramid = $2
-WHERE userid = $1;
+WHERE discordid = $1;
 
 -- name: ListUsers :many
 SELECT * from "user"
-ORDER BY userid
+ORDER BY discordid
 LIMIT $1
 OFFSET $2;

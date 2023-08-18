@@ -1,4 +1,4 @@
-package broempsignal
+package invite
 
 func inviteAllFriends() {
 }

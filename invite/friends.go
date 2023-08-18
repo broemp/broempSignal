@@ -1,4 +1,4 @@
-package broempsignal
+package invite
 
 func addFriend(userid, friendid string) error {
 	return nil

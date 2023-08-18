@@ -19,7 +19,11 @@ func NewServer(store *db.Store) *Server {
 	router.POST("/users", server.createUser)
 	router.GET("/users/:id", server.getUser)
 	router.GET("/users/", server.listUser)
-	// router.GET("/users/discord/:discordid", server.getDiscordUser)
+
+	// AFK endpoint
+	router.POST("/afk/create", server.createAFK)
+	router.GET("/afk/list/:id", server.listAFK)
+	router.GET("/afk/count/:id", server.countAFK)
 
 	server.router = router
 	return server

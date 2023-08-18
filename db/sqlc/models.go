@@ -8,6 +8,12 @@ import (
 	"database/sql"
 )
 
+type Afk struct {
+	Afkid     int64         `json:"afkid"`
+	Userid    sql.NullInt64 `json:"userid"`
+	CreatedAt sql.NullTime  `json:"created_at"`
+}
+
 type Group struct {
 	Groupid   int64        `json:"groupid"`
 	Hostid    int64        `json:"hostid"`
@@ -30,9 +36,8 @@ type Invite struct {
 }
 
 type User struct {
-	Userid     int64         `json:"userid"`
-	Username   string        `json:"username"`
 	Discordid  int64         `json:"discordid"`
+	Username   string        `json:"username"`
 	Telegramid sql.NullInt64 `json:"telegramid"`
 	CreatedAt  sql.NullTime  `json:"created_at"`
 }

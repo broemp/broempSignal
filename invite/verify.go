@@ -1,4 +1,4 @@
-package broempsignal
+package invite
 
 func register(discordID string) error {
 	return nil
