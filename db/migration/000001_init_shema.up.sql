@@ -1,32 +1,36 @@
 CREATE TABLE "user" (
-  "userid" BIGSERIAL PRIMARY KEY,
+  "discordid" bigint PRIMARY KEY,
   "username" varchar NOT NULL,
-  "discordid" bigint NOT NULL,
   "telegramid" bigint,
-  "afk" int NOT NULL DEFAULT 0,
   "created_at" timestamp DEFAULT (now())
 );
 
 CREATE TABLE "group" (
   "groupid" BIGSERIAL PRIMARY KEY,
-  "hostid" bigserial NOT NULL,
+  "hostid" bigint NOT NULL,
   "active" bool DEFAULT true,
   "created_at" timestamp DEFAULT (now())
 );
 
 CREATE TABLE "invite" (
   "groupid" bigserial,
-  "guestid" bigserial,
+  "guestid" bigint,
   "accepted" bool DEFAULT null,
   "created_at" timestamp DEFAULT (now()),
   PRIMARY KEY ("groupid", "guestid")
 );
 
 CREATE TABLE "hoepperCount" (
-  "hoepper" bigserial,
-  "victim" bigserial,
+  "hoepper" bigint,
+  "victim" bigint,
   "hoepperCount" integer,
   PRIMARY KEY ("hoepper", "victim")
+);
+
+CREATE TABLE "afk" (
+  "afkid" BIGSERIAL PRIMARY KEY,
+  "userid" bigint,
+  "created_at" timestamp DEFAULT (now())
 );
 
 CREATE INDEX ON "user" ("discordid");
@@ -43,14 +47,18 @@ CREATE INDEX ON "hoepperCount" ("hoepper");
 
 CREATE INDEX ON "hoepperCount" ("victim");
 
+CREATE INDEX ON "afk" ("userid");
+
 COMMENT ON COLUMN "invite"."accepted" IS 'null = waiting, false=declined, true=accepted';
 
-ALTER TABLE "group" ADD FOREIGN KEY ("hostid") REFERENCES "user" ("userid");
+ALTER TABLE "group" ADD FOREIGN KEY ("hostid") REFERENCES "user" ("discordid");
 
 ALTER TABLE "invite" ADD FOREIGN KEY ("groupid") REFERENCES "group" ("groupid");
 
-ALTER TABLE "invite" ADD FOREIGN KEY ("guestid") REFERENCES "user" ("userid");
+ALTER TABLE "invite" ADD FOREIGN KEY ("guestid") REFERENCES "user" ("discordid");
 
-ALTER TABLE "hoepperCount" ADD FOREIGN KEY ("hoepper") REFERENCES "user" ("userid");
+ALTER TABLE "hoepperCount" ADD FOREIGN KEY ("hoepper") REFERENCES "user" ("discordid");
 
-ALTER TABLE "hoepperCount" ADD FOREIGN KEY ("victim") REFERENCES "user" ("userid");
+ALTER TABLE "hoepperCount" ADD FOREIGN KEY ("victim") REFERENCES "user" ("discordid");
+
+ALTER TABLE "afk" ADD FOREIGN KEY ("userid") REFERENCES "user" ("discordid");

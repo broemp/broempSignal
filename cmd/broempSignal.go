@@ -7,7 +7,6 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/broemp/broempSignal/api"
-	"github.com/broemp/broempSignal/bots/discord"
 	db "github.com/broemp/broempSignal/db/sqlc"
 	"github.com/broemp/broempSignal/util"
 )
@@ -25,13 +24,8 @@ func main() {
 
 	store := db.NewStore(conn)
 	server := api.NewServer(store)
-
 	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal("Cannot start server:", err)
-	}
-
-	if config.DiscordToken != "" {
-		discord.InitDiscord(config.DiscordToken, config.DiscordGuildId)
 	}
 }
