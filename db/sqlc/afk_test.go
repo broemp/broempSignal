@@ -29,3 +29,10 @@ func TestGetAFK(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, i.Int64, num)
 }
+
+func TestListUsersByAFKCount(t *testing.T) {
+	// TODO: Write better test
+	list, err := testQueries.ListUsersByAFKCount(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, list)
+}

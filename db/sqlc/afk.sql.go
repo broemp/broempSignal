@@ -48,3 +48,40 @@ func (q *Queries) ListAFK(ctx context.Context, userid sql.NullInt64) (Afk, error
 	err := row.Scan(&i.Afkid, &i.Userid, &i.CreatedAt)
 	return i, err
 }
+
+const listUsersByAFKCount = `-- name: ListUsersByAFKCount :many
+SELECT userid, username, count(*) from "afk"
+JOIN "user" ON "user".discordid = "afk".userid 
+GROUP BY userid, username
+ORDER BY count(*) desc
+LIMIT 15
+`
+
+type ListUsersByAFKCountRow struct {
+	Userid   sql.NullInt64 `json:"userid"`
+	Username string        `json:"username"`
+	Count    int64         `json:"count"`
+}
+
+func (q *Queries) ListUsersByAFKCount(ctx context.Context) ([]ListUsersByAFKCountRow, error) {
+	rows, err := q.db.QueryContext(ctx, listUsersByAFKCount)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListUsersByAFKCountRow{}
+	for rows.Next() {
+		var i ListUsersByAFKCountRow
+		if err := rows.Scan(&i.Userid, &i.Username, &i.Count); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
