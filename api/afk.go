@@ -8,7 +8,7 @@ import (
 )
 
 type afkRequest struct {
-	User int64 `json:"user" binding:"required"`
+	User int64 `json:"discordid" binding:"required"`
 }
 
 func (server *Server) createAFK(ctx *gin.Context) {
@@ -53,6 +53,16 @@ func (server *Server) countAFK(ctx *gin.Context) {
 		return
 	}
 	afk, err := server.store.GetAFKCount(ctx, sql.NullInt64{Int64: req.User, Valid: true})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, afk)
+}
+
+func (server *Server) listAFKByCount(ctx *gin.Context) {
+	afk, err := server.store.ListUsersByAFKCount(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

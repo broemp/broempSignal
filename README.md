@@ -1,19 +1,18 @@
 # BroempSignal
 
-A Discord and Telegram Bot that messages your friends for you!
+Discord Bot Backend.
 
 ## Running the Program
 
 ### Locally
 
 Create an .env file or set the Envs according to the [.env.example](.env.example) and
-Create an sqlite Database
-Then run the following Commands
+run a postgres db
 
 ```sh
 git clone https://github.com/broemp/broempSignal
 go mod install
-go run BroempSignal.go
+go run cmd/BroempSignal.go
 ```
 
 ### Docker
@@ -24,29 +23,54 @@ Use the [Docker Compose File](docker-compose.yml)
 version: '3.8'
 services:
   broempSignal:
-    image: broemp/broemp_signal:latest
+    image: broemp/broemp-signal:latest
     container_name: broempSignal
     restart: always
     environment:
-      # Discord Bot Token https://discord.com/developers/applications
-      - DISCORD_TOKEN=<token>
-      # Discord Server ID
-      - GUILD_ID=<guild_id>
-      # Telegram Bot Token https://telegram.me/BotFather
-      - TELEGRAM_TOKEN=<token>
-    # or use env_file
-    #env_file:
-    #  - ".env"
-    volumes:
-      # Make DB persistent 
-      - ./data.db:/app/data.db
+      #DB Settings 
+      - DB_DRIVER=postgres
+      - DB_SOURCE=postgresql://{USER}:{PASSWORD}@{IP}:{PORT}/broempSignal?sslmode=disable
+      #Server Settings
+      - SERVER_ADDRESS=0.0.0.0:8080
 ```
- or run
+
+# API Endpoints
+
+## Users
 ```
-docker run \
-  -e DISCORD_TOKEN=<token> \
-  -e GUILD_ID=<guild_id> \
-  -e TELEGRAM_TOKEN=<token> \
-  -v ./data.db:/app/data.db \
-  broemp/broemp_signal 
+# POST: Create User
+/user
+## Body
+{
+	"username": "{name}",
+	"discordid": {id}
+}
+
+# GET: List all users
+/users
+
+# GET: List all data for one user
+/users/{id}
+
+# POST: Add telegramID to User
+```
+
+## AFK
+```
+# POST: Create AFK entry
+/afk
+## Body
+{
+  "discordid": {id}
+}
+
+# GET: List all AFKs order by count
+/afk/list
+
+# GET: AFK List for one user
+/afk/list/{id}
+
+# GET: AFK count for one user
+/afk/count/{id}
+
 ```
