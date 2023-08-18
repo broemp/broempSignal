@@ -1,6 +1,6 @@
 # BroempSignal
 
-A Discord and Telegram Bot that messages your friends for you!
+Discord Bot Backend.
 
 ## Running the Program
 
