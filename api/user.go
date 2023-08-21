@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -82,4 +83,27 @@ func (server *Server) listUser(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, users)
+}
+
+func (server *Server) Create_user_if_not_exists(ctx *gin.Context, userid int64, username string) (db.User, error) {
+	arg := db.CreateUserParams{
+		Username:  username,
+		Discordid: userid,
+	}
+
+	user, err := server.store.GetUser(ctx, userid)
+	if err == sql.ErrNoRows {
+		user, err = server.store.CreateUser(ctx, arg)
+		if err != nil {
+			log.Println("user creation error")
+			return db.User{}, err
+		}
+
+	} else if err != nil {
+		log.Println("other error")
+		return db.User{}, err
+	}
+
+	log.Println("user created")
+	return user, nil
 }
