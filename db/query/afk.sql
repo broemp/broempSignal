@@ -5,7 +5,7 @@ INSERT INTO "afk" (
     $1
 ) RETURNING *;
 
--- name: ListAFK :one
+-- name: ListAFK :many
 SELECT * from "afk"
 WHERE userid = $1;
 

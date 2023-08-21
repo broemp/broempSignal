@@ -37,16 +37,32 @@ func (q *Queries) GetAFKCount(ctx context.Context, userid sql.NullInt64) (int64,
 	return count, err
 }
 
-const listAFK = `-- name: ListAFK :one
+const listAFK = `-- name: ListAFK :many
 SELECT afkid, userid, created_at from "afk"
 WHERE userid = $1
 `
 
-func (q *Queries) ListAFK(ctx context.Context, userid sql.NullInt64) (Afk, error) {
-	row := q.db.QueryRowContext(ctx, listAFK, userid)
-	var i Afk
-	err := row.Scan(&i.Afkid, &i.Userid, &i.CreatedAt)
-	return i, err
+func (q *Queries) ListAFK(ctx context.Context, userid sql.NullInt64) ([]Afk, error) {
+	rows, err := q.db.QueryContext(ctx, listAFK, userid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Afk{}
+	for rows.Next() {
+		var i Afk
+		if err := rows.Scan(&i.Afkid, &i.Userid, &i.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listUsersByAFKCount = `-- name: ListUsersByAFKCount :many
