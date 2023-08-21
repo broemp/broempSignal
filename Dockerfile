@@ -12,4 +12,4 @@ RUN CGO_ENABLED=0 go build -o /broempSignal cmd/broempSignal.go
 FROM alpine
 WORKDIR /app
 COPY --from=BUILD /broempSignal .
-CMD ["/app/broempSignal"]
+CMD ["/broempSignal"]
